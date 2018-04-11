@@ -1,0 +1,13 @@
+#include "sys/regdef.h"
+#include "asm/unistd.h"
+
+     .data
+     .text
+     .global main
+main:
+     .set noreorder
+     .cpload        t9             # PIC ABI crap (function prologue)
+     .set reorder
+     li a0, 99
+     li v0, __NR_exit
+     syscall
