@@ -101,13 +101,15 @@ struct ag71xx_buf {
 };
 
 struct ag71xx_ring {
-	struct ag71xx_buf	*buf;
-	u8			*descs_cpu;
-	dma_addr_t		descs_dma;
-	u16			desc_split;
-	u16			order;
+	/* "Hot" fields in the data path. */
 	unsigned int		curr;
 	unsigned int		dirty;
+	/* "Cold" fields - not used in the data path. */
+	struct ag71xx_buf	*buf;
+	u16			desc_split;
+	u16			order;
+	dma_addr_t		descs_dma;
+	u8			*descs_cpu;
 };
 
 struct ag71xx_mdio {
