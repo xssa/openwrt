@@ -166,6 +166,21 @@ define Device/eap115-v1
 endef
 TARGET_DEVICES += eap115-v1
 
+define Device/eap115-v4
+  DEVICE_TITLE := TP-LINK EAP115 v4
+  MTDPARTS := spi0.0:128k(u-boot)ro,64k(pation-table)ro,64k(product-info)ro,1536k(kernel),6144k(rootfs),192k(config)ro,64k(ART)ro,7680k@0x40000(firmware)
+  IMAGE_SIZE := 7680k
+  BOARDNAME := EAP115
+  TPLINK_BOARD_NAME := EAP115v4
+  DEVICE_PROFILE := EAP115
+  LOADER_TYPE := elf
+  KERNEL := kernel-bin | patch-cmdline | lzma | loader-kernel
+  IMAGES := sysupgrade.bin factory.bin
+  IMAGE/sysupgrade.bin := append-rootfs | tplink-safeloader sysupgrade
+  IMAGE/factory.bin := append-rootfs | tplink-safeloader factory
+endef
+TARGET_DEVICES += eap115-v4
+
 define Device/eap120
   DEVICE_TITLE := TP-LINK EAP120
   MTDPARTS := spi0.0:128k(u-boot)ro,64k(pation-table)ro,64k(product-info)ro,1536k(kernel),14336k(rootfs),192k(config)ro,64k(ART)ro,15872k@0x40000(firmware)
