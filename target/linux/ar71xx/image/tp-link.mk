@@ -131,6 +131,19 @@ $(Device/cpe510-520)
 endef
 TARGET_DEVICES += cpe210-v2
 
+define Device/cpe210-v3
+$(Device/cpe510-520)
+  DEVICE_TITLE := TP-LINK CPE210 v3
+  DEVICE_PACKAGES := rssileds
+  BOARDNAME := CPE210V2
+  TPLINK_BOARD_NAME := CPE210V3
+  KERNEL := kernel-bin | patch-cmdline | lzma | mktplinkfw-kernel
+  TPLINK_HWID := 0x0
+  TPLINK_HWREV := 0
+  TPLINK_HEADER_VERSION := 1
+endef
+TARGET_DEVICES += cpe210-v3
+
 define Device/wbs210
 $(Device/cpe510-520)
   DEVICE_TITLE := TP-LINK WBS210
