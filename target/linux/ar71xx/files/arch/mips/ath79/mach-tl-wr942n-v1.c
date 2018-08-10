@@ -28,6 +28,9 @@
 #include "dev-wmac.h"
 #include "nvram.h"
 
+#define TL_WR942N_V1				1
+#define TL_WR942N_V2				2
+
 #define TL_WR942N_V1_KEYS_POLL_INTERVAL		20
 #define TL_WR942N_V1_KEYS_DEBOUNCE_INTERVAL	\
 					(3 * TL_WR942N_V1_KEYS_POLL_INTERVAL)
@@ -71,53 +74,54 @@
 #define TL_WR942N_V1_WMAC_CALDATA_OFFSET	0x1000
 #define TL_WR942N_V1_DEFAULT_MAC_ADDR		0x1fe40008
 #define TL_WR942N_V1_DEFAULT_MAC_SIZE		0x200
+#define TL_WR942N_V2_DEFAULT_MAC_ADDR		0x1fe60008
 
 #define GPIO_IN_ENABLE0_UART_SIN_LSB		8
 #define GPIO_IN_ENABLE0_UART_SIN_MASK		0x0000ff00
 
 static struct gpio_led tl_wr942n_v1_leds_gpio[] __initdata = {
 	{
-		.name		= "tl-wr942n-v1:green:status",
+		.name		= "tp-link:green:system",
 		.gpio		= TL_WR942N_V1_GPIO_LED_STATUS,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:wlan",
+		.name		= "tp-link:green:wlan",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_WLAN,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:lan1",
+		.name		= "tp-link:green:lan1",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_LAN1,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:lan2",
+		.name		= "tp-link:green:lan2",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_LAN2,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:lan3",
+		.name		= "tp-link:green:lan3",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_LAN3,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:lan4",
+		.name		= "tp-link:green:lan4",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_LAN4,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:wan",
+		.name		= "tp-link:green:wan",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_WAN_GREEN,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:amber:wan",
+		.name		= "tp-link:amber:wan",
 		.gpio		= TL_WR942N_V1_74HC_GPIO_LED_WAN_AMBER,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:wps",
+		.name		= "tp-link:green:wps",
 		.gpio		= TL_WR942N_V1_GPIO_LED_WPS,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:usb1",
+		.name		= "tp-link:green:usb1",
 		.gpio		= TL_WR942N_V1_GPIO_LED_USB1,
 		.active_low	= 1,
 	}, {
-		.name		= "tl-wr942n-v1:green:usb2",
+		.name		= "tp-link:green:usb2",
 		.gpio		= TL_WR942N_V1_GPIO_LED_USB2,
 		.active_low	= 1,
 	},
@@ -196,12 +200,18 @@ static void tl_wr942n_v1_get_mac(const char *name, char *mac)
 		pr_err("no MAC address found for %s\n", name);
 }
 
-static void __init tl_wr942n_v1_setup(void)
+static void tl_wr942n_setup(u32 version)
 {
 	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
 	u8 tmpmac[ETH_ALEN];
 	void __iomem *base;
 	u32 t;
+	if (version == 1) {
+		tl_wr942n_v1_get_mac("MAC:", tmpmac);
+	}
+	else { //version = 2
+		memcpy(&tmpmac, (u8 *) KSEG1ADDR(TL_WR942N_V2_DEFAULT_MAC_ADDR), ETH_ALEN);
+	}
 
 	ath79_register_m25p80(NULL);
 
@@ -228,7 +238,6 @@ static void __init tl_wr942n_v1_setup(void)
 					ARRAY_SIZE(tl_wr942n_v1_gpio_keys),
 					tl_wr942n_v1_gpio_keys);
 
-	tl_wr942n_v1_get_mac("MAC:", tmpmac);
 
 	/* swap PHYs */
 	ath79_setup_qca956x_eth_cfg(QCA956X_ETH_CFG_SW_PHY_SWAP |
@@ -274,6 +283,14 @@ static void __init tl_wr942n_v1_setup(void)
 			 GPIOF_OUT_INIT_HIGH | GPIOF_EXPORT_DIR_FIXED,
 			 "LED reset");
 }
+static void  __init tl_wr942n_v1_setup(void)
+{tl_wr942n_setup(TL_WR942N_V1);}
 
 MIPS_MACHINE(ATH79_MACH_TL_WR942N_V1, "TL-WR942N-V1", "TP-LINK TL-WR942N v1",
 	     tl_wr942n_v1_setup);
+
+static void  __init tl_wr942n_v2_setup(void)
+{tl_wr942n_setup(TL_WR942N_V2);}
+
+MIPS_MACHINE(ATH79_MACH_TL_WR942N_V2, "TL-WR942N-V2", "TP-LINK TL-WR942N v2",
+	     tl_wr942n_v2_setup);

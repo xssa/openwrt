@@ -75,6 +75,7 @@ struct device_info {
 	const char *vendor;
 	const char *support_list;
 	char support_trail;
+	const char *soft_ver;
 	const struct flash_partition_entry partitions[MAX_PARTITIONS+1];
 	const char *first_sysupgrade_partition;
 	const char *last_sysupgrade_partition;
@@ -130,6 +131,7 @@ static struct device_info boards[] = {
 			"CPE220(TP-LINK|US|N300-2):1.1\r\n"
 			"CPE220(TP-LINK|EU|N300-2):1.1\r\n",
 		.support_trail = '\xff',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
@@ -167,6 +169,7 @@ static struct device_info boards[] = {
 			"CPE520(TP-LINK|US|N300-5):1.1\r\n"
 			"CPE520(TP-LINK|EU|N300-5):1.1\r\n",
 		.support_trail = '\xff',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
@@ -198,6 +201,7 @@ static struct device_info boards[] = {
 			"WBS210(TP-LINK|US|N300-2):1.20\r\n"
 			"WBS210(TP-LINK|EU|N300-2):1.20\r\n",
 		.support_trail = '\xff',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
@@ -229,6 +233,7 @@ static struct device_info boards[] = {
 			"WBS510(TP-LINK|US|N300-5):1.20\r\n"
 			"WBS510(TP-LINK|EU|N300-5):1.20\r\n",
 		.support_trail = '\xff',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
@@ -259,6 +264,7 @@ static struct device_info boards[] = {
 			"SupportList:\r\n"
 			"{product_name:Archer C2600,product_ver:1.0.0,special_id:00000000}\r\n",
 		.support_trail = '\x00',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"SBL1", 0x00000, 0x20000},
@@ -299,10 +305,11 @@ static struct device_info boards[] = {
 		.vendor = "",
 		.support_list =
 			"SupportList:\r\n"
-			"{product_name:ArcherC5,"
-			"product_ver:2.0.0,"
-			"special_id:00000000}\r\n",
+			"{product_name:ArcherC5,product_ver:2.0.0,special_id:00000000}\r\n"
+			"{product_name:ArcherC5,product_ver:2.0.0,special_id:55530000}\r\n"
+			"{product_name:ArcherC5,product_ver:2.0.0,special_id:4A500000}\r\n", /* JP version */
 		.support_trail = '\x00',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x40000},
@@ -337,6 +344,7 @@ static struct device_info boards[] = {
 			"product_ver:1.0.0,"
 			"special_id:00000000}\n",
 		.support_trail = '\x00',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x40000},
@@ -369,6 +377,7 @@ static struct device_info boards[] = {
 			"SupportList:\r\n"
 			"EAP120(TP-LINK|UN|N300-2):1.0\r\n",
 		.support_trail = '\xff',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
@@ -398,6 +407,7 @@ static struct device_info boards[] = {
 			"SupportList:\n"
 			"{product_name:TL-WR1043ND,product_ver:4.0.0,special_id:45550000}\n",
 		.support_trail = '\x00',
+		.soft_ver = NULL,
 
 		/**
 		    We use a bigger os-image partition than the stock images (and thus
@@ -426,20 +436,58 @@ static struct device_info boards[] = {
 		.last_sysupgrade_partition = "file-system"
 	},
 
-	/** Firmware layout for the TLWR942N_V1 */
+	/** Firmware layout for the TL-WR902AC v1 */
 	{
-		.id	= "TL-WR942N",
-		.vendor	= "",
+		.id     = "TL-WR902AC-V1",
+		.vendor = "",
+		.support_list =
+			"SupportList:\n"
+			"{product_name:TL-WR902AC,product_ver:1.0.0,special_id:45550000}\n"
+			"{product_name:TL-WR902AC,product_ver:1.0.0,special_id:55530000}\n",
+		.support_trail = '\x00',
+		.soft_ver = NULL,
+
+		/**
+		   384KB were moved from file-system to os-image
+		   in comparison to the stock image
+		*/
+		.partitions = {
+			{"fs-uboot", 0x00000, 0x20000},
+			{"os-image", 0x20000, 0x180000},
+			{"file-system", 0x1a0000, 0x5b0000},
+			{"default-mac", 0x750000, 0x00200},
+			{"pin", 0x750200, 0x00200},
+			{"product-info", 0x750400, 0x0fc00},
+			{"soft-version", 0x760000, 0x0b000},
+			{"support-list", 0x76b000, 0x04000},
+			{"profile", 0x770000, 0x04000},
+			{"default-config", 0x774000, 0x0b000},
+			{"user-config", 0x780000, 0x40000},
+			{"partition-table", 0x7c0000, 0x10000},
+			{"log", 0x7d0000, 0x20000},
+			{"radio", 0x7f0000, 0x10000},
+			{NULL, 0, 0}
+		},
+
+		.first_sysupgrade_partition = "os-image",
+		.last_sysupgrade_partition = "file-system",
+	},
+
+	/** Firmware layout for the TL-WR942N V1 */
+	{
+		.id     = "TLWR942NV1",
+		.vendor = "",
 		.support_list =
 			"SupportList:\r\n"
 			"{product_name:TL-WR942N,product_ver:1.0.0,special_id:00000000}\r\n"
 			"{product_name:TL-WR942N,product_ver:1.0.0,special_id:52550000}\r\n",
 		.support_trail = '\x00',
+		.soft_ver = NULL,
 
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
-			{"os-image", 0x20000, 0x150000},
-			{"file-system", 0x170000, 0xcd0000},
+			{"os-image", 0x20000, 0x180000},
+			{"file-system", 0x1a0000, 0xca0000},
 			{"default-mac", 0xe40000, 0x00200},
 			{"pin", 0xe40200, 0x00200},
 			{"product-info", 0xe40400, 0x0fc00},
@@ -461,6 +509,44 @@ static struct device_info boards[] = {
 		.first_sysupgrade_partition = "os-image",
 		.last_sysupgrade_partition = "file-system",
 	},
+
+	/** Firmware layout for the TL-WR942N V2 */
+	{
+		.id     = "TLWR942NV2",
+		.vendor = "",
+		.support_list =
+			"SupportList:\n"
+			"{product_name:TL-WR942N,product_ver:2.0.0,special_id:52550000}\n",
+		.support_trail = '\x00',
+		.soft_ver = "soft_ver:2.1.0",
+
+		.partitions = {
+			{"factory-boot", 0x00000, 0x20000},
+			{"fs-uboot", 0x20000, 0x20000},
+			{"os-image", 0x40000, 0x180000},
+			{"file-system", 0x1c0000, 0xca0000},
+			{"default-mac", 0xe60000, 0x00200},
+			{"pin", 0xe60200, 0x00200},
+			{"product-info", 0xe60400, 0x0fc00},
+			{"partition-table", 0xe70000, 0x10000},
+			{"soft-version", 0xe80000, 0x10000},
+			{"support-list", 0xe90000, 0x0f000},
+			{"extra-para", 0xe9f000, 0x01000},
+			{"profile", 0xea0000, 0x10000},
+			{"default-config", 0xeb0000, 0x10000},
+			{"user-config", 0xec0000, 0x40000},
+			{"qos-db", 0xf00000, 0x40000},
+			{"certificate", 0xf40000, 0x10000},
+			{"usb-config", 0xfc0000, 0x10000},
+			{"log", 0xfd0000, 0x20000},
+			{"radio", 0xff0000, 0x10000},
+			{NULL, 0, 0}
+		},
+
+		.first_sysupgrade_partition = "os-image",
+		.last_sysupgrade_partition = "file-system",
+	},
+
 	/** Firmware layout for the RE450 */
 	{
 		.id = "RE450",
@@ -476,6 +562,7 @@ static struct device_info boards[] = {
 			"{product_name:RE450,product_ver:1.0.0,special_id:4B520000}\r\n"
 			"{product_name:RE450,product_ver:1.0.0,special_id:55534100}\r\n",
 		.support_trail = '\x00',
+		.soft_ver = NULL,
 
 		/**
 		   The flash partition table for RE450;
@@ -484,8 +571,8 @@ static struct device_info boards[] = {
 		*/
 		.partitions = {
 			{"fs-uboot", 0x00000, 0x20000},
-			{"os-image", 0x20000, 0x150000},
-			{"file-system", 0x170000, 0x4a0000},
+			{"os-image", 0x20000, 0x180000},
+			{"file-system", 0x1a0000, 0x460000},
 			{"partition-table", 0x600000, 0x02000},
 			{"default-mac", 0x610000, 0x00020},
 			{"pin", 0x610100, 0x00020},
@@ -537,6 +624,20 @@ static void free_image_partition(struct image_partition_entry entry) {
 	free(entry.data);
 }
 
+static time_t source_date_epoch = -1;
+static void set_source_date_epoch() {
+	char *env = getenv("SOURCE_DATE_EPOCH");
+	char *endptr = env;
+	errno = 0;
+        if (env && *env) {
+		source_date_epoch = strtoull(env, &endptr, 10);
+		if (errno || (endptr && *endptr != '\0')) {
+			fprintf(stderr, "Invalid SOURCE_DATE_EPOCH");
+			exit(1);
+		}
+        }
+}
+
 /** Generates the partition-table partition */
 static struct image_partition_entry make_partition_table(const struct flash_partition_entry *p) {
 	struct image_partition_entry entry = alloc_image_partition("partition-table", 0x800);
@@ -580,7 +681,9 @@ static struct image_partition_entry make_soft_version(uint32_t rev) {
 
 	time_t t;
 
-	if (time(&t) == (time_t)(-1))
+	if (source_date_epoch != -1)
+		t = source_date_epoch;
+	else if (time(&t) == (time_t)(-1))
 		error(1, errno, "time");
 
 	struct tm *tm = localtime(&t);
@@ -600,6 +703,23 @@ static struct image_partition_entry make_soft_version(uint32_t rev) {
 	s->rev = htonl(rev);
 
 	s->pad2 = 0xff;
+
+	return entry;
+}
+
+static struct image_partition_entry make_soft_version_from_string(const char *soft_ver) {
+	/** String length _including_ the terminating zero byte */
+	uint32_t ver_len = strlen(soft_ver) + 1;
+	/** Partition contains 64 bit header, the version string, and one additional null byte */
+	size_t partition_len = 2*sizeof(uint32_t) + ver_len + 1;
+	struct image_partition_entry entry = alloc_image_partition("soft-version", partition_len);
+
+	uint32_t *len = (uint32_t *)entry.data;
+	len[0] = htonl(ver_len);
+	len[1] = 0;
+	memcpy(&len[2], soft_ver, ver_len);
+
+	entry.data[partition_len - 1] = 0;
 
 	return entry;
 }
@@ -650,6 +770,15 @@ static struct image_partition_entry read_file(const char *part_name, const char 
 	return entry;
 }
 
+/** Creates a new image partition from arbitrary data */
+static struct image_partition_entry put_data(const char *part_name, const char *datain, size_t len) {
+
+	struct image_partition_entry entry = alloc_image_partition(part_name, len);
+
+	memcpy(entry.data, datain, len);
+
+	return entry;
+}
 
 /**
    Copies a list of image partitions into an image buffer and generates the image partition table while doing so
@@ -831,13 +960,24 @@ static void build_image(const char *output,
 		bool add_jffs2_eof,
 		bool sysupgrade,
 		const struct device_info *info) {
-	struct image_partition_entry parts[6] = {};
+
+	struct image_partition_entry parts[7] = {};
 
 	parts[0] = make_partition_table(info->partitions);
-	parts[1] = make_soft_version(rev);
+	if (info->soft_ver)
+		parts[1] = make_soft_version_from_string(info->soft_ver);
+	else
+		parts[1] = make_soft_version(rev);
+
 	parts[2] = make_support_list(info);
 	parts[3] = read_file("os-image", kernel_image, false);
 	parts[4] = read_file("file-system", rootfs_image, add_jffs2_eof);
+
+	/* Some devices need the extra-para partition to accept the firmware */
+	if (strcasecmp(info->id, "TLWR942NV2") == 0) {
+		const char mdat[11] = {0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
+		parts[5] = put_data("extra-para", mdat, 11);
+	}
 
 	size_t len;
 	void *image;
@@ -897,6 +1037,7 @@ int main(int argc, char *argv[]) {
 	bool add_jffs2_eof = false, sysupgrade = false;
 	unsigned rev = 0;
 	const struct device_info *info;
+	set_source_date_epoch();
 
 	while (true) {
 		int c;

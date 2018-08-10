@@ -207,6 +207,7 @@ platform_check_image() {
 	ap132|\
 	ap90q|\
 	tl-wr942n-v1|\
+	tl-wr942n-v2|\
 	bullet-m|\
 	c-55|\
 	carambola2|\

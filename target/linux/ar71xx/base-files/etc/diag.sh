@@ -36,7 +36,6 @@ get_status_led() {
 	db120|\
 	dr344|\
 	tew-632brp|\
-	tl-wr942n-v1|\
 	wpj344|\
 	zbt-we1526)
 		status_led="$board:green:status"
@@ -373,7 +372,9 @@ get_status_led() {
 	tl-wr842n-v2|\
 	tl-wr842n-v3|\
 	tl-wr941nd|\
-	tl-wr941nd-v5)
+	tl-wr941nd-v5|\
+	tl-wr942n-v1|\
+	tl-wr942n-v2)
 		status_led="tp-link:green:system"
 		;;
 	archer-c5|\
