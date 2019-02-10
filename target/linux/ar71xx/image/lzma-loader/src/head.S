@@ -41,6 +41,18 @@ LEAF(startup)
 	xori	t0, 0x1f
 	mtc0	t0, CP0_STATUS
 	ehb
+/*
+ * Some bootloaders set the 'Kseg0 coherency algorithm' to
+ * 'Cacheable, noncoherent, write-through, no write allocate'
+ * and this cause performance issues. Let's go and change it to
+ * 'Cacheable, noncoherent, write-back, write allocate'
+ */
+	mfc0	t0, CP0_CONFIG
+	li	t1, ~7			#~CONF_CM_CMASK
+	and	t0, t1
+	ori	t0, 3			#CONF_CM_CACHABLE_NONCOHERENT
+	mtc0	t0, CP0_CONFIG
+	nop
 
 	mtc0	zero, CP0_COUNT
 	mtc0	zero, CP0_COMPARE
