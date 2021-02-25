@@ -389,6 +389,32 @@ static struct device_info boards[] = {
 		.last_sysupgrade_partition = "file-system"
 	},
 
+	{
+		.id     = "EAP110-Outdoor-v3",
+		.vendor = "EAP110-Outdoor(TP-LINK|UN|N300-2):3.0\r\n",
+		.support_list =
+			"SupportList:\r\n"
+			"EAP110-Outdoor(TP-LINK|UN|N300-2):3.0\r\n",
+		.support_trail = '\xff',
+
+		.partitions = {
+			{"fs-uboot", 0x00000, 0x20000},
+			{"partition-table", 0x20000, 0x02000},
+			{"default-mac", 0x30000, 0x01000},
+			{"support-list", 0x31000, 0x00100},
+			{"product-info", 0x31100, 0x00400},
+			{"soft-version", 0x32000, 0x00100},
+			{"os-image", 0x40000, 0x180000},
+			{"file-system", 0x1c0000, 0x600000},
+			{"user-config", 0x7c0000, 0x30000},
+			{"radio", 0x7f0000, 0x10000},
+			{NULL, 0, 0}
+		},
+
+		.first_sysupgrade_partition = "os-image",
+		.last_sysupgrade_partition = "file-system"
+	},
+
 	/** Firmware layout for the EAP115 */
 	{
 		.id     = "EAP115",
