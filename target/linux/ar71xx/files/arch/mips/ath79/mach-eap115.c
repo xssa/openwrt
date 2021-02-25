@@ -22,6 +22,10 @@
 #include "dev-wmac.h"
 #include "machtypes.h"
 
+#define EAP110_OUTDOORV3_GPIO_LED_YEL	11
+#define EAP110_OUTDOORV3_GPIO_LED_GRN	12
+#define EAP110_OUTDOORV3_GPIO_LED_RED	13
+
 #define EAP115_SSR_CP	11
 #define EAP115_SSR_DS	12
 
@@ -31,52 +35,68 @@
 #define EAP115_GPIO_LED_RED	16
 #define EAP115_GPIO_BTN_RESET	17
 
-#define EAP115_KEYS_POLL_INTERVAL	20 /* msecs */
-#define EAP115_KEYS_DEBOUNCE_INTERVAL	(3 * EAP115_KEYS_POLL_INTERVAL)
+#define EAP_KEYS_POLL_INTERVAL	20 /* msecs */
+#define EAP_KEYS_DEBOUNCE_INTERVAL	(3 * EAP_KEYS_POLL_INTERVAL)
 
 #define EAP115_LAN_PHYADDR		4
 
+
+static struct gpio_led eap110outdoorv3_leds_gpio[] __initdata = {
+	{
+		.name		= "eap:red:system",
+		.gpio		= EAP110_OUTDOORV3_GPIO_LED_RED,
+		.active_low	= 1,
+	}, {
+		.name		= "eap:yellow:system",
+		.gpio		= EAP110_OUTDOORV3_GPIO_LED_YEL,
+		.active_low	= 1,
+	}, {
+		.name		= "eap:green:system",
+		.gpio		= EAP110_OUTDOORV3_GPIO_LED_GRN,
+		.active_low	= 1,
+	}
+};
+
 static struct gpio_led eap115_leds_gpio[] __initdata = {
 	{
-		.name		= "eap115:red:system",
+		.name		= "eap:red:system",
 		.gpio		= EAP115_GPIO_LED_RED,
 		.active_low	= 0,
 	}, {
-		.name		= "eap115:yellow:system",
+		.name		= "eap:yellow:system",
 		.gpio		= EAP115_GPIO_LED_YEL,
 		.active_low	= 0,
 	}, {
-		.name		= "eap115:green:system",
+		.name		= "eap:green:system",
 		.gpio		= EAP115_GPIO_LED_GRN,
 		.active_low	= 0,
 	}, {
-		.name		= "eap115:all:off",
+		.name		= "eap:all:off",
 		.gpio		= EAP115_GPIO_LED_ALL,
 		.active_low	= 1,
 	}
 };
 
-static struct gpio_keys_button eap115_gpio_keys[] __initdata = {
+static struct gpio_keys_button eap_gpio_keys[] __initdata = {
 	{
 		.desc		= "Reset button",
 		.type		= EV_KEY,
 		.code		= KEY_RESTART,
-		.debounce_interval = EAP115_KEYS_DEBOUNCE_INTERVAL,
+		.debounce_interval = EAP_KEYS_DEBOUNCE_INTERVAL,
 		.gpio		= EAP115_GPIO_BTN_RESET,
 		.active_low	= 1,
 	}
 };
 
-static void __init eap_setup(u8 *mac)
+static void __init eap_common_setup(u8 *mac, unsigned num_leds, struct gpio_led *leds)
 {
 	ath79_device_reset_clear(/*0xc03300); QCA953X_RESET_GE1_MDIO | QCA953X_RESET_GE0_MAC \
 		| QCA953X_RESET_ETH_SWITCH | */QCA953X_RESET_ETH_SWITCH_ANALOG);
-	ath79_register_leds_gpio(-1, ARRAY_SIZE(eap115_leds_gpio),
-				 eap115_leds_gpio);
 
-	ath79_register_gpio_keys_polled(1, EAP115_KEYS_POLL_INTERVAL,
-					ARRAY_SIZE(eap115_gpio_keys),
-					eap115_gpio_keys);
+	ath79_register_leds_gpio(-1, num_leds, leds);
+	ath79_register_gpio_keys_polled(1, EAP_KEYS_POLL_INTERVAL,
+					ARRAY_SIZE(eap_gpio_keys),
+					eap_gpio_keys);
 
 	ath79_register_m25p80(NULL);
 
@@ -88,16 +108,28 @@ static void __init eap_setup(u8 *mac)
 	ath79_register_eth(1);
 }
 
+static void __init eap110outdoorv3_setup(void)
+{
+	u8 *mac = (u8 *) KSEG1ADDR(0x1f030008);
+	u8 *ee = (u8 *) KSEG1ADDR(0x1fff1000);
+
+	eap_common_setup(mac, ARRAY_SIZE(eap110outdoorv3_leds_gpio),
+				 eap110outdoorv3_leds_gpio);
+	ath79_register_wmac(ee, mac);
+}
+
+MIPS_MACHINE(ATH79_MACH_EAP110OUTDOORV3, "EAP110OUTDOORV3", "TP-LINK EAP110-outdoor v3",
+		eap110outdoorv3_setup);
+
 static void __init eap115_setup(void)
 {
 	u8 *mac = (u8 *) KSEG1ADDR(0x1f030008);
 	u8 *ee = (u8 *) KSEG1ADDR(0x1fff1000);
 
-	eap_setup(mac);
-
+	eap_common_setup(mac, ARRAY_SIZE(eap115_leds_gpio),
+				 eap115_leds_gpio);
 	ath79_register_wmac(ee, mac);
 }
 
-MIPS_MACHINE(ATH79_MACH_EAP115, "EAP115", "TP-LINK EAP115",
+MIPS_MACHINE(ATH79_MACH_EAP115, "EAP115", "TP-LINK EAP11x family",
 		eap115_setup);
-

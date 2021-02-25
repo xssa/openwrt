@@ -487,6 +487,7 @@ platform_check_image() {
 		;;
 	cpe210|\
 	cpe510|\
+	eap110-outdoor-v3|\
 	eap115|\
 	eap120|\
 	wbs210|\

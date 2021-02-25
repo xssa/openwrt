@@ -600,7 +600,11 @@ ar71xx_board_detect() {
 	*E2100L)
 		name="e2100l"
 		;;
-	*"EAP115")
+	*"EAP110-outdoor v3")
+		name="eap110-outdoor-v3"
+		tplink_pharos_board_detect
+		;;
+	*"EAP11x family")
 		name="eap115"
 		tplink_pharos_board_detect
 		;;

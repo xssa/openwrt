@@ -163,9 +163,10 @@ get_status_led() {
 	dw33d)
 		status_led="$board:blue:status"
 		;;
+	eap110-outdoor-v3|\
 	eap115|\
 	eap120)
-		status_led="$(ar71xx_board_name):green:system"
+		status_led="eap:green:system"
 		;;
 	eap300v2)
 		status_led="engenius:blue:power"

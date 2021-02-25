@@ -123,6 +123,7 @@ ar71xx_setup_interfaces()
 	alfa-ap96|\
 	alfa-nx|\
 	dr344|\
+	eap110-outdoor-v3|\
 	eap115|\
 	gl-ar150|\
 	gl-ar300m|\
